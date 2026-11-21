@@ -21,4 +21,9 @@ export const siteConfig = {
    * Her name, the photos and the letter would then be findable on Google.
    */
   indexable: false,
+  /**
+   * "Make a wish" section. Off until a valid Resend key is saved in Vercel.
+   * Set to true, push, and the section and its menu link come back.
+   */
+  wishesEnabled: false,
 } as const;

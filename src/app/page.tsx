@@ -16,9 +16,10 @@ import { Wish } from "@/components/scenes/Wish";
 import { TitleCard } from "@/components/scenes/TitleCard";
 import { Controls } from "@/components/ui/Controls";
 import { content } from "@/content/anniversary";
+import { siteConfig } from "@/config/site";
 import { resolvePhotos } from "@/lib/photos.server";
 
-const chapters = [
+const allChapters = [
   { id: "top", label: "Two years. One forever." },
   { id: "met", label: "Once, a stranger" },
   { id: "mountains", label: "You sent me mountains" },
@@ -30,9 +31,16 @@ const chapters = [
   { id: "letter", label: "A letter from me" },
   { id: "bouquet", label: "Flowers for you" },
   { id: "future", label: "Our future" },
-  { id: "wish", label: "Make a wish" },
   { id: "finale", label: "One last thing" },
 ];
+
+const chapters = siteConfig.wishesEnabled
+  ? [
+      ...allChapters.slice(0, -1),
+      { id: "wish", label: "Make a wish" },
+      allChapters[allChapters.length - 1],
+    ]
+  : allChapters;
 
 export default function Home() {
   const photos = resolvePhotos();
@@ -90,7 +98,7 @@ export default function Home() {
           photo={photos[c.future.photo]}
           photoMobile={photos[c.future.photoMobile]}
         />
-        <Wish copy={c.wish} />
+        {siteConfig.wishesEnabled && <Wish copy={c.wish} />}
         <Finale finale={c.finale} photo={c.finale.photo ? photos[c.finale.photo] : undefined} />
 
         <footer className="bg-charcoal-950 text-ivory-100/35 px-5 pt-6 pb-24 text-center text-xs tracking-[0.2em] uppercase">
