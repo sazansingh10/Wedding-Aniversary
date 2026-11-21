@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { AmbientHandle } from "@/lib/ambient";
 import { cn } from "@/lib/cn";
+import { musicBus } from "@/lib/musicBus";
 
 interface ControlsProps {
   musicSrc: string | null;
@@ -49,6 +50,7 @@ function MusicToggle({ src, title }: { src: string | null; title: string }) {
         if (ambient.current) {
           const a = ambient.current;
           ambient.current = null;
+          musicBus.set(null);
           await a.stop();
         }
         setPlaying(false);
@@ -59,6 +61,7 @@ function MusicToggle({ src, title }: { src: string | null; title: string }) {
         } else {
           const { startAmbient } = await import("@/lib/ambient");
           ambient.current = await startAmbient();
+          musicBus.set(ambient.current);
         }
         setPlaying(true);
       }

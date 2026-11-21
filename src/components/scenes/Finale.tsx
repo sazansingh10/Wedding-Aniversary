@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { m } from "motion/react";
 import { useRef, useState } from "react";
 import { Magnetic } from "@/components/motion/Magnetic";
+import { musicBus } from "@/lib/musicBus";
 import { Reveal } from "@/components/motion/Reveal";
 import { Photo } from "@/components/ui/Photo";
 import type { Finale as FinaleContent, ResolvedPhoto } from "@/types/content";
@@ -22,6 +23,10 @@ export function Finale({ finale, photo }: { finale: FinaleContent; photo?: Resol
 
   const reveal = () => {
     setRevealed(true);
+    // The final touch: petals fall across the screen, and if the lullaby is
+    // playing it answers with a soft closing chime.
+    musicBus.chime();
+    void import("@/lib/petalShower").then((mod) => mod.petalShower(7500));
     requestAnimationFrame(() => {
       messageRef.current?.focus({ preventScroll: true });
       messageRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
