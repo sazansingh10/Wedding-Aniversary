@@ -1,5 +1,8 @@
 import { content } from "@/content/anniversary";
-import { createRateLimiter, formatWishEmail, validateWish } from "@/lib/wish";
+import { createRateLimiter, formatWishEmail, resolveWishConfig, validateWish } from "@/lib/wish";
+
+// Server-only fallback recipient (this file never ships to the browser).
+const DEFAULT_TO = "sazansingh10@gmail.com";
 
 /**
  * POST /api/wish: emails Neela's wish to Sajan.
@@ -48,10 +51,12 @@ export async function POST(request: Request) {
   if (!result.ok) return json(400, { error: result.error });
 
   const text = formatWishEmail(result.wish, new Date(), content.timeZone, content.her);
-  const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.WISH_TO_EMAIL;
+  const { apiKey, to } = resolveWishConfig(
+    { RESEND_API_KEY: process.env.RESEND_API_KEY, WISH_TO_EMAIL: process.env.WISH_TO_EMAIL },
+    DEFAULT_TO,
+  );
 
-  if (!apiKey || !to) {
+  if (!apiKey) {
     if (process.env.NODE_ENV !== "production") {
       console.info("\n[wish] (dev, not emailed: set RESEND_API_KEY and WISH_TO_EMAIL)\n" + text);
       return json(200, { ok: true, dev: true });

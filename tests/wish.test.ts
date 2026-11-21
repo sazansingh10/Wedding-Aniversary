@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { createRateLimiter, formatWishEmail, validateWish, WISH_MAX } from "@/lib/wish";
+import {
+  createRateLimiter,
+  formatWishEmail,
+  resolveWishConfig,
+  validateWish,
+  WISH_MAX,
+} from "@/lib/wish";
 
 describe("validateWish", () => {
   it("accepts and trims a normal wish", () => {
@@ -44,5 +50,24 @@ describe("createRateLimiter", () => {
     expect(allow("a", 20)).toBe(false);
     expect(allow("b", 20)).toBe(true);
     expect(allow("a", 1500)).toBe(true);
+  });
+});
+
+describe("resolveWishConfig", () => {
+  const def = "me@example.com";
+  it("uses both variables when set correctly", () => {
+    expect(resolveWishConfig({ RESEND_API_KEY: "re_abc", WISH_TO_EMAIL: "x@y.com" }, def)).toEqual({
+      apiKey: "re_abc",
+      to: "x@y.com",
+    });
+  });
+  it("recovers when the key was pasted into WISH_TO_EMAIL", () => {
+    expect(resolveWishConfig({ WISH_TO_EMAIL: "re_abc" }, def)).toEqual({
+      apiKey: "re_abc",
+      to: def,
+    });
+  });
+  it("reports no key when nothing is set", () => {
+    expect(resolveWishConfig({}, def)).toEqual({ apiKey: null, to: def });
   });
 });

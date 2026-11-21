@@ -58,3 +58,21 @@ export function createRateLimiter(limit: number, windowMs: number) {
     return true;
   };
 }
+
+/**
+ * Works out the Resend key and recipient from the environment, tolerating a
+ * common setup slip: pasting the API key into WISH_TO_EMAIL instead of adding
+ * RESEND_API_KEY. A value starting with "re_" is always treated as a key, and
+ * the recipient falls back to `defaultTo` (server-side only).
+ */
+export function resolveWishConfig(
+  env: { RESEND_API_KEY?: string; WISH_TO_EMAIL?: string },
+  defaultTo: string,
+): { apiKey: string | null; to: string } {
+  const key = env.RESEND_API_KEY?.trim();
+  const toRaw = env.WISH_TO_EMAIL?.trim();
+  const toIsKey = !!toRaw && toRaw.startsWith("re_");
+  const apiKey = key && key.startsWith("re_") ? key : toIsKey ? toRaw : key || null;
+  const to = toRaw && !toIsKey && toRaw.includes("@") ? toRaw : defaultTo;
+  return { apiKey: apiKey ?? null, to };
+}
